@@ -1,0 +1,4 @@
+Checks:         '-*, readability-identifier-naming' # Only this check
+CheckOptions:
+  readability-identifier-naming.ClassMemberPrefix: 'm_'
+  readability-identifier-naming.ClassMemberCase: camelBack
