@@ -2,6 +2,7 @@
 #include <cstring>
 #include <netdb.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 
 Client::Client(const std::string& host,int port)
     :m_host(host),m_port(port),m_sockfd(-1) {}
@@ -19,9 +20,9 @@ bool Client::connectToServer()
     
     std::memset(&addrInfoHints, 0 , sizeof(addrInfoHints));  //clean the hints structure
     
-    addrInfoHints.ai_family = AF_UNSPEC; //unspecified for automatic detection of Ipv4 or Ipv6
+    addrInfoHints.ai_family = AF_UNSPEC;
  
-    addrInfoHints.ai_socktype = SOCK_STREAM; //macro for TCP
+    addrInfoHints.ai_socktype = SOCK_STREAM; 
 
     std::string portStr = std::to_string(m_port);
     
@@ -35,12 +36,10 @@ bool Client::connectToServer()
         return 0;
     }
 
-    // if success, iterate over the resolved address
     for(auto addr = addrInfoList;addr != nullptr ; addr  = addr->ai_next)
     {
         m_sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
         
-        //in case, the creation was unsucessfull, jump to the next one node in the linked list
         if(m_sockfd == -1) continue;
         
         if(connect(m_sockfd,addr->ai_addr,addr->ai_addrlen)==0) break; //we got our connection established
@@ -50,9 +49,8 @@ bool Client::connectToServer()
         m_sockfd = -1;
     }
 
-    freeaddrinfo(addrInfoList); //release the address information
+    freeaddrinfo(addrInfoList);
 
-    //in case if connection failed
     if(m_sockfd == -1)
     {
         std::cerr<< "Host unreachable...\n";
@@ -70,4 +68,16 @@ void Client::kill()
         close(m_sockfd);
         m_sockfd = -1;
     }
+}
+
+int Client::getSockfd() const
+{
+    return m_sockfd;
+}
+
+bool Client::sendRESP(const std::string& command)
+{
+    if(m_sockfd == -1) return false;
+    ssize_t sent = send(m_sockfd, command.c_str(), command.size(), 0);
+    return (sent == (ssize_t)command.size());
 }
