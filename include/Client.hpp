@@ -19,7 +19,7 @@ public:
     [[__nodiscard__]] bool sendRESP(const std::string& command); 
     void kill();
     int getSockfd() const;
-    
+
 private:
     std::string m_host;
     int m_port;

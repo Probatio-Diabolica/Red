@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <functional>
 #include <ostream>
+#include <vector>
 
 /////////////////////////////////////////////////////////////////
 //static functions only
@@ -16,56 +17,105 @@ static std::string trimWhitespaces(const std::string& str)
     return str.substr(start,end-start+1);
 }
 
+static void displayHelp()
+{
+    std::cout << "red 1.0.0\n\n"
+              << "Usage:\n"
+              << "  With both host and port:\n"
+              << "      ./red -h <host> -p <port>\n"
+              << "  With default host (127.0.0.1):\n"
+              << "      ./red -p <port>\n"
+              << "  With default port (6379):\n"
+              << "      ./red -h <host>\n"
+              << "  One-shot command execution:\n"
+              << "      ./red <command> [arguments]\n\n"
+              << "Interactive Mode (REPL):\n"
+              << "  Run without arguments:\n"
+              << "      ./red\n"
+              << "  Then type Redis commands directly.\n\n"
+              << "Built-in commands:\n"
+              << "  help   - Display this help message\n"
+              << "  quit   - Exit the CLI\n\n"
+              << "Examples:\n"
+              << "  ./red status\n"
+              << "  ./red SET mykey \"Hello World\"\n"
+              << "  ./red GET mykey\n\n"
+              << "Preferences (set in ~/.redrc):\n"
+              << "  :set hints    Enable online command hints\n"
+              << "  :set nohints  Disable online command hints\n"
+              << std::endl;
+
+}
+
 //////////////////////////////////////////////////////////////////
 
 CLI::CLI(const std::string& host,int port)
-    :m_redisClient(host,port)
+    :m_host(host),m_port(port),m_redisClient(host,port)
 {
         
 }
 
 
-void CLI::run()
+void CLI::run(const std::vector<std::string>& commandTokens)
 {
-    if(!m_redisClient.connectToServer() ) return;
-    const std::unordered_map<std::string, std::function<void()>> commands={
-        {"help", []
-            { 
-                std::cout<< "Available commands : help, quit\n";}
-            },
-    
-        {"quit", []
-            { 
-                std::cout<<"Goodbye.\n";
-                std::exit(0);
-            }
-        }
-        
-    };
+    if(!m_redisClient.connectToServer()) return;
 
-    std::cout<<"Connected to redis at : "<<m_redisClient.getSockfd()<<'\n';
-    std::string host = "127.0.0.1";
-    int port = 2005;
-        
+    if(!commandTokens.empty())
+    {
+        queryRedis(commandTokens);
+        return ;
+    }
+
+    std::cout << "Connected to redis at " << m_redisClient.getSockfd() << '\n';
+
     while(true)
     {
-        std::cout<< host <<':'<<port<<"> "<<std::flush;
+        std::cout<< m_host << ':' << m_port << "> " << std::flush;
+
         std::string line;
         if(!std::getline(std::cin, line)) break;
-        
+
         line = trimWhitespaces(line);
-        if(line.empty()) continue;
-        auto args = CommandHandler::splitArgs(line);
-        if(args.empty()) continue;
-
-
-        auto cmd = args[0];
-        std::string command = CommandHandler::toRESP(args);
-        if(!m_redisClient.sendRESP(command))
+        if(line == "quit" or  line == "exit")
         {
-            std::cerr << "Error: Failed to send the command.\n";
+            std::cout<< "Goodbye\n";
             break;
         }
+
+        if(line == "help")
+        {
+            displayHelp();
+            continue;
+        }
+
+        const auto tokens = CommandHandler::splitArgs(line);
+
+        if(tokens.empty()) continue;
+
+        const std::string respCommand = CommandHandler::toRESP(tokens);
+        if(!m_redisClient.sendRESP(respCommand))
+        {
+            std::cerr << "Error :: failed to send command. \n";
+            break;
+        }
+
+        const  std::string reply = RedisResponseParser::parseRESPReply(m_redisClient.getSockfd());
+        std::cout<< reply  << '\n';
+
     }
 }
 
+void CLI::queryRedis(const std::vector<std::string>& commandTokens)
+{
+    if(commandTokens.empty()) return;
+
+    const std::string respCommand = CommandHandler::toRESP(commandTokens);
+    if(!m_redisClient.sendRESP(respCommand))
+    {
+        std::cerr <<  "ERROR:: failed to send command";
+        return;
+    }
+
+
+    std::cout<< RedisResponseParser::parseRESPReply(m_redisClient.getSockfd());
+}

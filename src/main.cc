@@ -1,4 +1,5 @@
 #include<iostream>
+#include <vector>
 #include "../include/CLI.hpp"
 /*
  *TODO::
@@ -27,7 +28,7 @@ int main(int argc, char* argv[])
     std::string host = "127.0.0.1";
     int port = 2005;
     int i =1;
-
+    std::vector<std::string> tokens;
     //getting the cli args
     while(i<argc)
     {
@@ -42,12 +43,19 @@ int main(int argc, char* argv[])
             ++i;
             port = std::stoi(argv[i]);
         }
-        else break;
+        else 
+        {
+            while(i < argc)
+            {
+                tokens.push_back(argv[i]);
+                ++i;
+            }
+        }
         ++i;
     }
     
 
     //hendling the RESP protocol
     CLI cli(host,port);
-    cli.run();
+    cli.run(tokens);
 }

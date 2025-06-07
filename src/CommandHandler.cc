@@ -18,7 +18,9 @@ std::vector<std::string> CommandHandler::splitArgs(const std::string &input)
     for(const auto& match : std::ranges::subrange(begin,end))
     {
         std::string token = match.str();
-    
+  
+
+        //quote removal
         if(token.size() >= 2 and token.front() == '\"' and token.back() == '\"')
         {
             token = token.substr(1,token.size() - 2);
@@ -32,17 +34,22 @@ std::vector<std::string> CommandHandler::splitArgs(const std::string &input)
 
 
 
+/* 
+* -> start of an array
+$ -> bulk of an array
++ -> args
+*/
 
 std::string CommandHandler::toRESP(const std::vector<std::string> &tokens)
 {
     std::string resp;
     resp.resize(64);
 
-    resp+="*" + std::to_string(tokens.size()) + "\r\n";
+    resp+="*" + std::to_string(tokens.size()) + "\r\n"; //number of tokens
 
-    for(std::string_view token:tokens)
+    for(std::string_view token:tokens) //inserts the lenght and value of a token
     {
-        resp+= "$" + std::to_string(token.size())+"\r\n";
+        resp+= "$" + std::to_string(token.size())+"\r\n"; 
         resp+=token;
         resp+="\r\n";
     }
