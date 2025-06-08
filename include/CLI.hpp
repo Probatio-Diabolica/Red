@@ -6,7 +6,7 @@
 
 #include "Client.hpp"
 #include "CommandHandler.hpp"
-#include "RedisResponseParser.hpp"
+#include "ServerResponseParser.hpp"
 class CLI
 {
 public:

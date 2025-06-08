@@ -3,7 +3,7 @@
 
 
 #include <string>
-class RedisResponseParser {
+class ServerResponseParser {
 public:
 
     // Parses a Redis RESP reply from the given socket and returns it as a string. In case of a failure, it return an empty string

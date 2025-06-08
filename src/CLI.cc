@@ -1,8 +1,5 @@
 #include "../include/CLI.hpp"
-#include <cstddef>
 #include <string>
-#include <unordered_map>
-#include <functional>
 #include <ostream>
 #include <vector>
 
@@ -11,10 +8,12 @@
 
 static std::string trimWhitespaces(const std::string& str)
 {
-    size_t start = str.find_last_not_of(" \t\n\r\f\v");
-    if(start == std::string::npos) return "";
-    size_t end = str.find_first_not_of(" \t\n\r\f\v");
-    return str.substr(start,end-start+1);
+    const auto begin = str.find_first_not_of(" \t\n\r\f\v");
+    if (begin == std::string::npos)
+        return "";
+
+    const auto end = str.find_last_not_of(" \t\n\r\f\v");
+    return str.substr(begin, end - begin + 1);
 }
 
 static void displayHelp()
@@ -66,16 +65,20 @@ void CLI::run(const std::vector<std::string>& commandTokens)
         return ;
     }
 
-    std::cout << "Connected to redis at " << m_redisClient.getSockfd() << '\n';
+    std::cout << "Connected to server at " << m_port << '\n';
 
     while(true)
     {
         std::cout<< m_host << ':' << m_port << "> " << std::flush;
 
         std::string line;
+
         if(!std::getline(std::cin, line)) break;
 
+
+        
         line = trimWhitespaces(line);
+
         if(line == "quit" or  line == "exit")
         {
             std::cout<< "Goodbye\n";
@@ -99,7 +102,7 @@ void CLI::run(const std::vector<std::string>& commandTokens)
             break;
         }
 
-        const  std::string reply = RedisResponseParser::parseRESPReply(m_redisClient.getSockfd());
+        const  std::string reply = ServerResponseParser::parseRESPReply(m_redisClient.getSockfd());
         std::cout<< reply  << '\n';
 
     }
@@ -117,5 +120,5 @@ void CLI::queryRedis(const std::vector<std::string>& commandTokens)
     }
 
 
-    std::cout<< RedisResponseParser::parseRESPReply(m_redisClient.getSockfd());
+    std::cout<< ServerResponseParser::parseRESPReply(m_redisClient.getSockfd());
 }

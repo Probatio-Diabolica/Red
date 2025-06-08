@@ -1,4 +1,4 @@
-#include "../include/RedisResponseParser.hpp"
+#include "../include/ServerResponseParser.hpp"
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -34,7 +34,7 @@ static std::string readLine(int sockfd)
 ///////////////////////////////////////////////////////////
 
 
-std::string RedisResponseParser::parseRESPReply(int sockfd)
+std::string ServerResponseParser::parseRESPReply(int sockfd)
 {
     char prefix;
     if(!readByte(sockfd, prefix)) return ("Error:: Failed to read response: no data received or connection closed.");
@@ -49,22 +49,22 @@ std::string RedisResponseParser::parseRESPReply(int sockfd)
     }
 }
    
-std::string RedisResponseParser::parseSimpleString(int sockfd)
+std::string ServerResponseParser::parseSimpleString(int sockfd)
 {
     return  readLine(sockfd);
 }
 
-std::string RedisResponseParser::parseSimpleError(int sockfd)
+std::string ServerResponseParser::parseSimpleError(int sockfd)
 {
     return "Error:: " + readLine(sockfd);
 }
 
-std::string RedisResponseParser::parseInterger(int sockfd)
+std::string ServerResponseParser::parseInterger(int sockfd)
 {
     return readLine(sockfd);
 }
 
-std::string RedisResponseParser::parseBulkString(int sockfd)
+std::string ServerResponseParser::parseBulkString(int sockfd)
 {
     const int length = std::stoi(readLine(sockfd));    
     if(length == -1) return "[nil]";
@@ -91,7 +91,7 @@ std::string RedisResponseParser::parseBulkString(int sockfd)
     return bulk;
 }
 
-std::string RedisResponseParser::parseArray(int sockfd)
+std::string ServerResponseParser::parseArray(int sockfd)
 {
     int count = std::stoi(readLine(sockfd));
 

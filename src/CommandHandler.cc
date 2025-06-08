@@ -1,5 +1,4 @@
 #include "../include/CommandHandler.hpp"
-
 #include <regex>
 #include <string>
 #include <string_view>
@@ -43,16 +42,16 @@ $ -> bulk of an array
 std::string CommandHandler::toRESP(const std::vector<std::string> &tokens)
 {
     std::string resp;
-    resp.resize(64);
+    resp.reserve(64);
 
     resp+="*" + std::to_string(tokens.size()) + "\r\n"; //number of tokens
 
     for(std::string_view token:tokens) //inserts the lenght and value of a token
     {
+
         resp+= "$" + std::to_string(token.size())+"\r\n"; 
         resp+=token;
         resp+="\r\n";
     }
-
     return resp;
 }
