@@ -69,7 +69,7 @@ void CLI::run(const std::vector<std::string>& commandTokens)
 
     while(true)
     {
-        std::cout<< m_host << ':' << m_port << "> " << std::flush;
+        std::cout<< m_host << '@' << m_port << "> " << std::flush;
 
         std::string line;
 

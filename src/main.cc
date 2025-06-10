@@ -1,31 +1,29 @@
 #include<iostream>
+#include <pwd.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <vector>
 #include "../include/CLI.hpp"
-/*
- *TODO::
- *  Client
- *  Command Handler
- *  Response parser
- *  CLI
- *
- *  CONNECTION=> TCP connection
- *  Parsing :: 
- *      > Command parsing: conversion of commands into RESP formats
- *      
- *      > Redis response parser
- * 
- * CLI::
- *      this will be the client, it will do the follwoing:
- *          > handle the redis responses
- *          > parse the redis responses
- *          >send the commands to the server
- * 
- *
- * */
+
+
+
+std::string getHost()
+{
+    std::string host;
+    uid_t id = getuid();
+    passwd* pw = getpwuid(id);
+
+    if(pw && pw->pw_name) host=pw->pw_name;
+    else host = "127.0.0.1";
+
+    return host;
+}
+
+
 
 int main(int argc, char* argv[])
 {
-    std::string host = "127.0.0.1";
+    std::string host = getHost();
     int port = 2005;
     int i =1;
     std::vector<std::string> tokens;
