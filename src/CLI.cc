@@ -16,36 +16,43 @@ static std::string trimWhitespaces(const std::string& str)
     return str.substr(begin, end - begin + 1);
 }
 
+
 static void displayHelp()
 {
-    std::cout << "red 1.0.0\n\n"
-              << "Usage:\n"
-              << "  With both host and port:\n"
-              << "      ./red -h <host> -p <port>\n"
-              << "  With default host (127.0.0.1):\n"
-              << "      ./red -p <port>\n"
-              << "  With default port (6379):\n"
-              << "      ./red -h <host>\n"
-              << "  One-shot command execution:\n"
-              << "      ./red <command> [arguments]\n\n"
-              << "Interactive Mode (REPL):\n"
-              << "  Run without arguments:\n"
-              << "      ./red\n"
-              << "  Then type Redis commands directly.\n\n"
-              << "Built-in commands:\n"
-              << "  help   - Display this help message\n"
-              << "  quit   - Exit the CLI\n\n"
-              << "Examples:\n"
-              << "  ./red status\n"
-              << "  ./red SET mykey \"Hello World\"\n"
-              << "  ./red GET mykey\n\n"
-              << "Preferences (set in ~/.redrc):\n"
-              << "  :set hints    Enable online command hints\n"
-              << "  :set nohints  Disable online command hints\n"
-              << std::endl;
+    std::cout << R"(red v1.0.0 - A lightweight CLI for Violet
 
+Usage:
+  Run with host and port:
+    ./red -h <host> -p <port>
+
+  Use default host (127.0.0.1):
+    ./red -p <port>
+
+  Use default port (6379):
+    ./red -h <host>
+
+  One-shot command execution:
+    ./red <command> [arguments...]
+
+  Interactive mode (REPL):
+    ./red
+    → Type commands directly like SET, GET, etc.
+
+Built-in CLI commands:
+  help      Show this help message
+  quit      Exit the CLI
+
+Examples:
+  ./red status
+  ./red SET mykey "Hello, World!"
+  ./red GET mykey
+
+Preferences (optional ~/.redrc):
+  :set hints      Enable inline command hints
+  :set nohints    Disable hints
+
+)" << '\n';
 }
-
 //////////////////////////////////////////////////////////////////
 
 CLI::CLI(const std::string& host,int port)
